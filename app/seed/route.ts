@@ -27,7 +27,11 @@ async function seedCustomers(db: Awaited<ReturnType<typeof getDb>>) {
 }
 
 async function seedInvoices(db: Awaited<ReturnType<typeof getDb>>) {
-  return db.collection('invoices').insertMany(invoices, { ordered: false }).catch(() => ({
+  const collection = db.collection('invoices');
+  // 清除没有 id 字段的旧数据（MongoDB 自动生成的 _id 不等于业务 id）
+  await collection.deleteMany({ id: { $exists: false } });
+  await collection.createIndex({ id: 1 }, { unique: true });
+  return collection.insertMany(invoices, { ordered: false }).catch(() => ({
     insertedCount: 0,
   }));
 }
