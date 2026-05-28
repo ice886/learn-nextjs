@@ -24,14 +24,19 @@ export async function createInvoice(formData: FormData) {
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
-  const db = await getDb();
-  await db.collection('invoices').insertOne({
-    id: crypto.randomUUID(),
-    customer_id: customerId,
-    amount: amountInCents,
-    status,
-    date,
-  });
+  try {
+    const db = await getDb();
+    await db.collection('invoices').insertOne({
+      id: crypto.randomUUID(),
+      customer_id: customerId,
+      amount: amountInCents,
+      status,
+      date,
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    throw new Error('Failed to create invoice.');
+   }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
@@ -46,17 +51,23 @@ export async function updateInvoice(id: string, formData: FormData) {
  
   const amountInCents = amount * 100;
  
-  const db = await getDb();
-  await db.collection('invoices').updateOne(
-    { id },
-    { $set: { customer_id: customerId, amount: amountInCents, status } },
-  );
+  try {
+    const db = await getDb();
+    await db.collection('invoices').updateOne(
+      { id },
+      { $set: { customer_id: customerId, amount: amountInCents, status } },
+    );
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to update invoice.');
+  }
  
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
+
   const db = await getDb();
   await db.collection('invoices').deleteOne({ id });
 
