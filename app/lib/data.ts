@@ -196,7 +196,7 @@ export async function fetchInvoiceById(id: string) {
     const db = await getDb();
     const invoice = await db.collection('invoices').findOne(
       { id },
-      { projection: { id: 1, customer_id: 1, amount: 1, status: 1 } },
+      { projection: { _id: 0, id: 1, customer_id: 1, amount: 1, status: 1 } },
     );
 
     if (!invoice) return undefined;

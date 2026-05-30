@@ -5,11 +5,23 @@ import { MongoClient } from 'mongodb';
 const resolver = new dns.Resolver();
 resolver.setServers(['8.8.8.8', '1.1.1.1']);
 
+// 只在首次加载时保存，避免热重载时保存到已被劫持的 customLookup
+const originalLookup = (dns as any).__originalLookup || dns.lookup;
+(dns as any).__originalLookup = originalLookup;
+
+// localhost 和局域网地址走系统 DNS，其余走公共 DNS
+function isLocalHostname(hostname: string) {
+  return hostname === 'localhost' || hostname === '::1' || hostname.endsWith('.local') || /^127\.|^10\.|^192\.168\.|^172\.(1[6-9]|2\d|3[01])\.|^0\.0\.0\.0$/.test(hostname);
+}
+
 function customLookup(
   hostname: string,
   options: dns.LookupOptions | ((err: NodeJS.ErrnoException | null, address: string, family: number) => void),
   callback?: (err: NodeJS.ErrnoException | null, address: string, family: number) => void,
 ) {
+  if (isLocalHostname(hostname)) {
+    return (originalLookup as Function)(hostname, options, callback);
+  }
   const cb = typeof options === 'function' ? options : callback!;
   const opts = typeof options === 'object' ? options : {};
   const family = opts.family || opts.hints || 0;
