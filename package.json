@@ -29,13 +29,7 @@
     "@types/node": "22.10.7",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
+    "baseline-browser-mapping": "^2.10.32",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "bcrypt",
-      "sharp"
-    ]
-  }
-}
+  }}
